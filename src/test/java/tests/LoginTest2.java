@@ -7,12 +7,13 @@ import utilities.DataProviderUtil;
 import java.io.IOException;
 import java.util.Map;
 
-public class LoginTest {
+public class LoginTest2 {
 
     @DataProvider(name = "loginData")
     public Object[][] loginData() throws IOException {
-        return DataProviderUtil.getJsonDataFromClasspath(
-                "testdata/loginData.json"
+        return DataProviderUtil.getJsonDataFromProject(
+                "testdata",
+                "loginData.json"
         );
     }
 
@@ -25,6 +26,6 @@ public class LoginTest {
         System.out.println("Username: " + username);
 
         // Replace this with your actual login-page call.
-        System.out.println("Password: "+password);
+        System.out.println("Password: " + password);
     }
 }
