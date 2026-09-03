@@ -10,6 +10,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -24,8 +26,12 @@ public final class DataProviderUtil {
         // Prevent utility-class instantiation
     }
 
-    public static Object[][] getJsonDataToMap(String resourceName)
-            throws IOException {
+    /*
+     * Use for files under src/test/resources.
+     */
+    public static Object[][] getJsonDataFromClasspath(
+            String resourceName
+    ) throws IOException {
 
         InputStream inputStream = DataProviderUtil.class
                 .getClassLoader()
@@ -41,26 +47,76 @@ public final class DataProviderUtil {
                 inputStream,
                 StandardCharsets.UTF_8
         )) {
-            List<Map<String, Object>> testData;
-
-            try {
-                testData = GSON.fromJson(reader, TEST_DATA_TYPE);
-            } catch (JsonParseException exception) {
-                throw new IOException(
-                        "Invalid JSON in resource: " + resourceName,
-                        exception
-                );
-            }
-
-            if (testData == null || testData.isEmpty()) {
-                throw new IOException(
-                        "JSON resource contains no test data: " + resourceName
-                );
-            }
-
-            return testData.stream()
-                    .map(data -> new Object[]{data})
-                    .toArray(Object[][]::new);
+            return convertJsonToDataProvider(
+                    reader,
+                    "classpath resource: " + resourceName
+            );
         }
+    }
+
+    /*
+     * Use for files under the project folder but outside the classpath.
+     */
+    public static Object[][] getJsonDataFromProject(
+            String first,
+            String... more
+    ) throws IOException {
+
+        Path projectRoot = Path.of(
+                System.getProperty("user.dir")
+        ).toAbsolutePath().normalize();
+
+        Path jsonPath = projectRoot
+                .resolve(Path.of(first, more))
+                .normalize();
+
+        if (!jsonPath.startsWith(projectRoot)) {
+            throw new IOException(
+                    "JSON file must be inside the project folder: " + jsonPath
+            );
+        }
+
+        if (!Files.isRegularFile(jsonPath)) {
+            throw new IOException(
+                    "JSON file not found: " + jsonPath
+            );
+        }
+
+        try (Reader reader = Files.newBufferedReader(
+                jsonPath,
+                StandardCharsets.UTF_8
+        )) {
+            return convertJsonToDataProvider(
+                    reader,
+                    "file: " + jsonPath
+            );
+        }
+    }
+
+    private static Object[][] convertJsonToDataProvider(
+            Reader reader,
+            String source
+    ) throws IOException {
+
+        List<Map<String, String>> testData;
+
+        try {
+            testData = GSON.fromJson(reader, TEST_DATA_TYPE);
+        } catch (JsonParseException exception) {
+            throw new IOException(
+                    "Invalid JSON in " + source,
+                    exception
+            );
+        }
+
+        if (testData == null || testData.isEmpty()) {
+            throw new IOException(
+                    "JSON contains no test data in " + source
+            );
+        }
+
+        return testData.stream()
+                .map(data -> new Object[]{data})
+                .toArray(Object[][]::new);
     }
 }
