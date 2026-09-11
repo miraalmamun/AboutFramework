@@ -17,9 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public final class ExcelDataProviderUtil {
+public final class ExcelDataProvider {
 
-    private ExcelDataProviderUtil() {
+    private ExcelDataProvider() {
         // Prevent utility-class instantiation
     }
 
@@ -28,7 +28,7 @@ public final class ExcelDataProviderUtil {
             String sheetName
     ) throws IOException {
 
-        InputStream inputStream = ExcelDataProviderUtil.class
+        InputStream inputStream = ExcelDataProvider.class
                 .getClassLoader()
                 .getResourceAsStream(resourceName);
 

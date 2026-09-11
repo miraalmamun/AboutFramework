@@ -2,7 +2,7 @@ package tests;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import utilities.DataProviderUtil;
+import utilities.JsonDataProvider;
 
 import java.io.IOException;
 import java.util.Map;
@@ -11,7 +11,7 @@ public class LoginTest2 {
 
     @DataProvider(name = "loginData")
     public Object[][] loginData() throws IOException {
-        return DataProviderUtil.getJsonDataFromProject(
+        return JsonDataProvider.getJsonDataFromProject(
                 "testdata",
                 "loginData.json"
         );

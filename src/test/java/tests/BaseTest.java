@@ -5,6 +5,7 @@ import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import factory.PlaywrightFactory;
+import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
@@ -17,8 +18,20 @@ public abstract class BaseTest {
     }
 
     @AfterMethod(alwaysRun = true)
-    public final void tearDownPlaywright() {
-        PlaywrightFactory.quit();
+    public final void tearDownPlaywright(ITestResult testResult) {
+        try {
+            PlaywrightFactory.quit();
+        } catch (RuntimeException | Error cleanupFailure) {
+            Throwable testFailure = testResult.getThrowable();
+
+            if (testFailure != null) {
+                // Preserve the real assertion/test failure as the primary cause.
+                testFailure.addSuppressed(cleanupFailure);
+                return;
+            }
+
+            throw cleanupFailure;
+        }
     }
 
     protected final Page page() {

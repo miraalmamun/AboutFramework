@@ -15,14 +15,14 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-public final class DataProviderUtil {
+public final class JsonDataProvider {
 
     private static final Gson GSON = new Gson();
 
     private static final Type TEST_DATA_TYPE =
             new TypeToken<List<Map<String, String>>>() {}.getType();
 
-    private DataProviderUtil() {
+    private JsonDataProvider() {
         // Prevent utility-class instantiation
     }
 
@@ -33,7 +33,7 @@ public final class DataProviderUtil {
             String resourceName
     ) throws IOException {
 
-        InputStream inputStream = DataProviderUtil.class
+        InputStream inputStream = JsonDataProvider.class
                 .getClassLoader()
                 .getResourceAsStream(resourceName);
 
