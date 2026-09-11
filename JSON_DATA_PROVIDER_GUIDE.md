@@ -386,10 +386,10 @@ For stable test-data structures, consider a dedicated Java class or `record`.
 
 ## Which option should be used?
 
-| JSON location | Recommended call |
-|---|---|
-| `src/test/resources/testdata/loginData.json` | `getJsonDataFromClasspath("testdata/loginData.json")` |
-| `AboutFramework/testdata/loginData.json` | `getJsonDataFromProject("testdata", "loginData.json")` |
-| External configurable directory | Use `Path` with a configurable base-directory property |
+| JSON location                                | Recommended call                                       |
+|----------------------------------------------|--------------------------------------------------------|
+| `src/test/resources/testdata/loginData.json` | `getJsonDataFromClasspath("testdata/loginData.json")`  |
+| `AboutFramework/testdata/loginData.json`     | `getJsonDataFromProject("testdata", "loginData.json")` |
+| External configurable directory              | Use `Path` with a configurable base-directory property |
 
 For test data committed with the automation project, prefer `src/test/resources` and `getJsonDataFromClasspath()`. Use `getJsonDataFromProject()` when the file intentionally remains outside the classpath.

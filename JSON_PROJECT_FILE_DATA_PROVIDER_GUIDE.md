@@ -307,11 +307,11 @@ For stable test-data structures, consider using a dedicated Java class or `recor
 
 ## Classpath versus project-file approach
 
-| File location | Recommended API | Example input |
-|---|---|---|
-| `src/test/resources/testdata/loginData.json` | `ClassLoader.getResourceAsStream()` | `"testdata/loginData.json"` |
-| `AboutFramework/testdata/loginData.json` | `Path` and `Files` | `"testdata", "loginData.json"` |
-| External configurable directory | `Path` and a system property | `-Dtest.data.dir=...` |
+| File location                                | Recommended API                     | Example input                  |
+|----------------------------------------------|-------------------------------------|--------------------------------|
+| `src/test/resources/testdata/loginData.json` | `ClassLoader.getResourceAsStream()` | `"testdata/loginData.json"`    |
+| `AboutFramework/testdata/loginData.json`     | `Path` and `Files`                  | `"testdata", "loginData.json"` |
+| External configurable directory              | `Path` and a system property        | `-Dtest.data.dir=...`          |
 
 ## Recommendation
 
