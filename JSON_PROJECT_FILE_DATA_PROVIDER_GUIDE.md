@@ -19,7 +19,7 @@ AboutFramework
             ├── tests
             │   └── LoginTest.java
             └── utilities
-                └── DataProviderUtil.java
+                └── JsonDataProvider.java
 ```
 
 The `testdata` directory is directly under the project root. It is not under `src/test/resources`, so it is not a classpath resource.
@@ -36,7 +36,7 @@ Add Gson inside the `<dependencies>` section of `pom.xml`:
 </dependency>
 ```
 
-## DataProviderUtil implementation
+## JsonDataProvider implementation
 
 ```java
 package utilities;
@@ -54,14 +54,14 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-public final class DataProviderUtil {
+public final class JsonDataProvider {
 
     private static final Gson GSON = new Gson();
 
     private static final Type TEST_DATA_TYPE =
             new TypeToken<List<Map<String, String>>>() {}.getType();
 
-    private DataProviderUtil() {
+    private JsonDataProvider() {
         // Prevent utility-class instantiation
     }
 
@@ -145,7 +145,7 @@ package tests;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import utilities.DataProviderUtil;
+import utilities.JsonDataProvider;
 
 import java.io.IOException;
 import java.util.Map;
@@ -154,7 +154,7 @@ public class LoginTest {
 
     @DataProvider(name = "loginData")
     public Object[][] loginData() throws IOException {
-        return DataProviderUtil.getJsonDataFromProject(
+        return JsonDataProvider.getJsonDataFromProject(
                 "testdata",
                 "loginData.json"
         );
@@ -224,9 +224,9 @@ macOS/Linux:
 System.getProperty("user.dir")
 ```
 
-`user.dir` identifies the working directory from which the Java process started. IntelliJ and Maven normally start the test with the project root as the working directory, allowing the method to resolve the `testdata` folder.
+`user.dir` identifies the working directory from which the Java process started. IntelliJ and Maven normally start the test with the project root as the working directory, allowing the method to resolve project-relative paths.
 
-This assumption is not guaranteed. A Jenkins job or custom run configuration can use a different working directory. When that happens, either configure the working directory as the project root or supply the test-data directory through a system property.
+This assumption is not guaranteed. A Jenkins job or custom run configuration can use a different working directory. When that happens, either configure the working directory as the project root or supply an explicit location.
 
 ## Optional configurable location
 
@@ -315,4 +315,4 @@ For stable test-data structures, consider using a dedicated Java class or `recor
 
 ## Recommendation
 
-Prefer `src/test/resources` and `ClassLoader` for test data committed with the project. Use this project-file implementation when the file must intentionally remain outside the classpath or needs to be managed as a normal filesystem file.
+Prefer `src/test/resources` and `ClassLoader` for test data committed with the project. Use this project-file implementation when the file must intentionally remain outside the classpath or needs to be supplied from a configurable external location.
