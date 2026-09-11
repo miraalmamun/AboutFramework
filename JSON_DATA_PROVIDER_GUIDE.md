@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`DataProviderUtil` reads JSON test data from either:
+`JsonDataProvider` reads JSON test data from either:
 
 1. The Java classpath, such as `src/test/resources`.
 2. A normal folder under the project root, such as `AboutFramework/testdata`.
@@ -36,7 +36,7 @@ AboutFramework
         │   ├── tests
         │   │   └── LoginTest.java
         │   └── utilities
-        │       └── DataProviderUtil.java
+        │       └── JsonDataProvider.java
         └── resources
             └── testdata
                 └── loginData.json     # Classpath resource
@@ -44,7 +44,7 @@ AboutFramework
 
 The two JSON locations demonstrate different loading approaches. A real test normally uses only the location appropriate for the framework.
 
-## Complete DataProviderUtil
+## Complete JsonDataProvider
 
 ```java
 package utilities;
@@ -64,14 +64,14 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-public final class DataProviderUtil {
+public final class JsonDataProvider {
 
     private static final Gson GSON = new Gson();
 
     private static final Type TEST_DATA_TYPE =
             new TypeToken<List<Map<String, String>>>() {}.getType();
 
-    private DataProviderUtil() {
+    private JsonDataProvider() {
         // Prevent utility-class instantiation
     }
 
@@ -82,7 +82,7 @@ public final class DataProviderUtil {
             String resourceName
     ) throws IOException {
 
-        InputStream inputStream = DataProviderUtil.class
+        InputStream inputStream = JsonDataProvider.class
                 .getClassLoader()
                 .getResourceAsStream(resourceName);
 
@@ -211,7 +211,7 @@ package tests;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import utilities.DataProviderUtil;
+import utilities.JsonDataProvider;
 
 import java.io.IOException;
 import java.util.Map;
@@ -220,7 +220,7 @@ public class ClasspathLoginTest {
 
     @DataProvider(name = "classpathLoginData")
     public Object[][] classpathLoginData() throws IOException {
-        return DataProviderUtil.getJsonDataFromClasspath(
+        return JsonDataProvider.getJsonDataFromClasspath(
                 "testdata/loginData.json"
         );
     }
@@ -264,7 +264,7 @@ package tests;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import utilities.DataProviderUtil;
+import utilities.JsonDataProvider;
 
 import java.io.IOException;
 import java.util.Map;
@@ -273,7 +273,7 @@ public class ProjectFileLoginTest {
 
     @DataProvider(name = "projectLoginData")
     public Object[][] projectLoginData() throws IOException {
-        return DataProviderUtil.getJsonDataFromProject(
+        return JsonDataProvider.getJsonDataFromProject(
                 "testdata",
                 "loginData.json"
         );
