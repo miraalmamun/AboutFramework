@@ -145,7 +145,7 @@ package tests;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import utilities.JsonDataProvider;
+import dataproviders.JsonDataProvider;
 
 import java.io.IOException;
 import java.util.Map;

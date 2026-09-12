@@ -1,13 +1,13 @@
 package dataproviders;
 
 import org.testng.annotations.DataProvider;
-import utilities.ExcelDataProvider;
 
 import java.io.IOException;
 
-public final class TestDataProviders {
 
-    private TestDataProviders() {
+public final class CommonDataProviders {
+
+    private CommonDataProviders() {
         // Prevent utility-class instantiation
     }
 
@@ -18,4 +18,12 @@ public final class TestDataProviders {
                 "LoginData"
         );
     }
+
+    @DataProvider(name = "jsonLoginData")
+    public Object[][] jsonLoginData() throws IOException {
+        return JsonDataProvider.getJsonDataFromClasspath(
+                "testdata/loginData.json"
+        );
+    }
+
 }

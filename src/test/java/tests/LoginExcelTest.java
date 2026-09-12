@@ -1,6 +1,6 @@
 package tests;
 
-import dataproviders.TestDataProviders;
+import dataproviders.CommonDataProviders;
 import org.testng.annotations.Test;
 
 import java.util.Map;
@@ -9,7 +9,7 @@ public class LoginExcelTest {
 
     @Test(
             dataProvider = "excelLoginData",
-            dataProviderClass = TestDataProviders.class
+            dataProviderClass = CommonDataProviders.class
     )
     public void loginTest(Map<String, String> data) {
 
