@@ -4,6 +4,7 @@ import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
+import config.ServiceUrls;
 import factory.PlaywrightFactory;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
@@ -155,6 +156,7 @@ import org.testng.annotations.BeforeMethod;
  * </ul>
  */
 public abstract class BaseTest {
+    private ServiceUrls serviceUrls;
 
     /**
      * Creates fresh Playwright resources before every TestNG test method.
@@ -164,16 +166,19 @@ public abstract class BaseTest {
      * {@code final} so a child test cannot accidentally override the mandatory
      * browser startup lifecycle.</p>
      *
-     * @throws IllegalStateException if factory state already exists on the
-     *                               current thread
+     * @throws IllegalStateException    if factory state already exists on the
+     *                                  current thread
      * @throws IllegalArgumentException if framework configuration is invalid
-     * @throws RuntimeException if Playwright/browser startup fails
+     * @throws RuntimeException         if Playwright/browser startup fails
      */
     @BeforeMethod(alwaysRun = true)
     public final void setUpPlaywright() {
         PlaywrightFactory.start();
+        serviceUrls = ServiceUrls.load();
     }
-
+    protected ServiceUrls urls() {
+        return serviceUrls;
+    }
     /**
      * Closes all Playwright resources after every TestNG test method.
      *
@@ -188,7 +193,7 @@ public abstract class BaseTest {
      * @param testResult TestNG result for the method that just completed
      * @throws RuntimeException if cleanup fails after an otherwise successful
      *                          test
-     * @throws Error if cleanup produces a serious JVM/Playwright error
+     * @throws Error            if cleanup produces a serious JVM/Playwright error
      */
     @AfterMethod(alwaysRun = true)
     public final void tearDownPlaywright(ITestResult testResult) {
@@ -281,7 +286,7 @@ public abstract class BaseTest {
      *
      * @return newly created isolated BrowserContext
      * @throws IllegalStateException if the factory is not started
-     * @throws RuntimeException if Playwright cannot create the context
+     * @throws RuntimeException      if Playwright cannot create the context
      */
     protected final BrowserContext newContext() {
         return PlaywrightFactory.newContext();

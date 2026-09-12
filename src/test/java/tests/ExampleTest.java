@@ -8,7 +8,7 @@ public final class ExampleTest extends BaseTest {
    //mvn -Dtest=ExampleTest -Dheadless=false -DslowMo=2000 test
     @Test
     public void playwrightWebsiteShouldOpen() {
-        page().navigate("https://playwright.dev");
+        page().navigate(urls().mirUi);
         assertThat(page()).hasTitle(
                 java.util.regex.Pattern.compile("Playwright")
         );
