@@ -1,7 +1,7 @@
 package dataproviders;
 
 import org.testng.annotations.DataProvider;
-import utilities.ExcelDataProviderUtil;
+import utilities.ExcelDataProvider;
 
 import java.io.IOException;
 
@@ -13,7 +13,7 @@ public final class TestDataProviders {
 
     @DataProvider(name = "excelLoginData")
     public static Object[][] excelLoginData() throws IOException {
-        return ExcelDataProviderUtil.getExcelDataFromClasspath(
+        return ExcelDataProvider.getExcelDataFromClasspath(
                 "testdata/loginData.xlsx",
                 "LoginData"
         );
