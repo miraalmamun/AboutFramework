@@ -1,48 +1,285 @@
-<?xml version="1.0" encoding="UTF-8"?>
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!--
+      Basic Maven project identity.
+
+      These values identify this project in Maven repositories and reports.
+      They do not control Playwright or TestNG behavior.
+    -->
     <groupId>com.mir.all</groupId>
     <artifactId>AboutFramework</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
+        <!--
+          Compile the framework with Java 25.
+
+          The Maven process and Jenkins agent must use JDK 25. Confirm with:
+              mvn -version
+
+          The output should show Java version 25.
+        -->
         <maven.compiler.release>25</maven.compiler.release>
+
+        <!-- Use UTF-8 consistently for Java files and generated reports. -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- Dependency versions are centralized here for easy maintenance. -->
+        <playwright.version>1.62.0</playwright.version>
         <testng.version>7.12.0</testng.version>
+        <gson.version>2.14.0</gson.version>
         <poi.version>5.5.1</poi.version>
+
+        <!-- Maven plugin versions are pinned for reproducible local/CI runs. -->
+        <maven.compiler.plugin.version>3.16.0</maven.compiler.plugin.version>
+        <maven.surefire.plugin.version>3.6.0</maven.surefire.plugin.version>
+
+        <!--
+          Default TestNG parallel-execution settings.
+
+          classes means different test classes may execute concurrently, while
+          methods belonging to the same class normally stay together. This is
+          a safe starting point for a new Page Object Model framework.
+
+          These Maven properties can be changed at runtime:
+              mvn clean test -Dtest.parallel.mode=methods -Dtest.thread.count=6
+
+          PlaywrightFactory uses ThreadLocal, so its Playwright object graph is
+          isolated for each executing TestNG thread. Test classes must still
+          avoid sharing mutable static Page or Page Object fields.
+        -->
+        <test.parallel.mode>classes</test.parallel.mode>
+        <test.thread.count>4</test.thread.count>
+
+        <!--
+          Default environment when Maven is run without -P.
+
+          It selects:
+              Environment/test/configuration.properties
+        -->
+        <build.profile.id>test</build.profile.id>
     </properties>
+
     <dependencies>
+        <!-- TestNG supplies @Test, @BeforeMethod, @AfterMethod and assertions. -->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>${testng.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.14.0</version>
-            <scope>compile</scope>
-        </dependency>
+
+        <!-- Playwright Java controls Chromium, Firefox and WebKit. -->
         <dependency>
             <groupId>com.microsoft.playwright</groupId>
             <artifactId>playwright</artifactId>
-            <version>1.62.0</version>
+            <version>${playwright.version}</version>
+            <scope>test</scope>
         </dependency>
+
+        <!-- Gson is used by the JSON TestNG data-provider utility. -->
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>2.0.18</version>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${gson.version}</version>
+            <scope>test</scope>
         </dependency>
+
+        <!-- poi-ooxml is used by the Excel TestNG data-provider utility. -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>${poi.version}</version>
-            <scope>compile</scope>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <!--
+              Maven Compiler Plugin
+
+              Reads maven.compiler.release and compiles both main and test Java
+              sources using the Java 25 language/API level.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+
+            <!--
+              Maven Surefire Plugin
+
+              Surefire runs TestNG tests during Maven's test phase. It is also
+              responsible for passing Maven/profile configuration into the
+              separate JVM that executes the tests.
+
+              IMPORTANT DIFFERENCE:
+
+              1. Maven or Jenkins command:
+                     mvn clean test
+                 Surefire executes and systemPropertiesFile is loaded.
+
+              2. IntelliJ green TestNG Run icon:
+                 Surefire does not execute. FrameworkConfig therefore loads the
+                 selected file directly as an IDE fallback.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire.plugin.version}</version>
+                <configuration>
+                    <!--
+                      Why systemPropertyVariables is needed
+
+                      Maven profiles exist in Maven, but test classes execute in
+                      a test JVM. These entries tell that JVM which environment
+                      profile Maven selected.
+
+                      app.env is the canonical key used by FrameworkConfig.
+                      ENVIRONMENT is retained for compatibility with existing
+                      framework code that may call System.getProperty("ENVIRONMENT").
+
+                      With -Pdev, both values become dev.
+                    -->
+                    <systemPropertyVariables>
+                        <app.env>${build.profile.id}</app.env>
+                        <ENVIRONMENT>${build.profile.id}</ENVIRONMENT>
+                    </systemPropertyVariables>
+
+                    <!--
+                      Why systemPropertiesFile is needed
+
+                      This loads every entry from the selected profile file as a
+                      JVM system property before TestNG starts.
+
+                      Example with -Ptest:
+                          Environment/test/configuration.properties
+
+                      Example with -Pdev:
+                          Environment/dev/configuration.properties
+
+                      Benefits:
+                      * FrameworkConfig can read values such as browser/baseUrl.
+                      * Existing code using System.getProperty continues to work.
+                      * The same Maven command works locally and in Jenkins.
+
+                      Every declared profile must have its matching file.
+                      Otherwise Maven should fail instead of silently running
+                      against the wrong environment.
+                    -->
+                    <systemPropertiesFile>
+                        ${project.basedir}/Environment/${build.profile.id}/configuration.properties
+                    </systemPropertiesFile>
+
+                    <!--
+                      Why promoteUserPropertiesToSystemProperties is needed
+
+                      Maven command-line -D values are user properties. Passing
+                      them to the test JVM lets a runtime value override the
+                      value loaded from configuration.properties.
+
+                      File value:
+                          browser=chromium
+
+                      Runtime override:
+                          mvn -Ptest clean test -Dbrowser=firefox
+
+                      Effective test value:
+                          firefox
+
+                      Surefire 3.6.0 enables this by default, but declaring it
+                      explicitly documents a critical framework requirement.
+                    -->
+                    <promoteUserPropertiesToSystemProperties>
+                        true
+                    </promoteUserPropertiesToSystemProperties>
+
+                    <!-- Bounded TestNG parallelism suitable for local/Jenkins. -->
+                    <parallel>${test.parallel.mode}</parallel>
+                    <threadCount>${test.thread.count}</threadCount>
+
+                    <!-- A CI build should not be green when no tests were found. -->
+                    <failIfNoTests>true</failIfNoTests>
+
+                    <!-- Keep Maven's useful test summary visible. -->
+                    <printSummary>true</printSummary>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!--
+      Maven profile usage examples
+
+      Default test profile:
+          mvn clean test
+
+      Explicit environment profile:
+          mvn -Pdev clean test
+
+      One test class, headed Firefox and slow motion:
+          mvn -Ptest clean test -Dtest=ExampleTest -Dbrowser=firefox -Dheadless=false -DslowMo=1000
+
+      API debug logging:
+          mvn -Ptest clean test -Dplaywright.debug=api
+
+      API plus browser debug logging:
+          mvn -Ptest clean test -Dplaywright.debug=all
+
+      IMPORTANT:
+      Use -Pdev, -Ptest2, and so on to select a Maven environment. Do not use
+      -Dapp.env=dev for a Maven run because systemPropertiesFile is selected by
+      build.profile.id. The -Dapp.env option is intended for a direct IntelliJ
+      TestNG run where Maven/Surefire is not executing.
+    -->
+    <profiles>
+        <profile>
+            <id>test</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <build.profile.id>test</build.profile.id>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>dev</id>
+            <properties>
+                <build.profile.id>dev</build.profile.id>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>test2</id>
+            <properties>
+                <build.profile.id>test2</build.profile.id>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>test3</id>
+            <properties>
+                <build.profile.id>test3</build.profile.id>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>test4</id>
+            <properties>
+                <build.profile.id>test4</build.profile.id>
+            </properties>
+        </profile>
+    </profiles>
 </project>
