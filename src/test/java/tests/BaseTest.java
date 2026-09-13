@@ -179,7 +179,7 @@ public abstract class BaseTest {
      * {@link FrameworkConfig#environment()} and prints it clearly in the console.
      * This helps testers confirm that the tests are running against the expected
      * environment, such as {@code dev}, {@code test}, {@code uat}, or
-     * {@code staging}.</p>
+     * {@code stage}.</p>
      *
      * <p>The environment may be selected through a Maven profile:</p>
      *

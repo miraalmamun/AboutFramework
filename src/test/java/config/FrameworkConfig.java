@@ -39,7 +39,7 @@ import java.util.Properties;
  *
  * <ul>
  *   <li>Maven: select the environment with {@code -Ptest}, {@code -Pdev},
- *       {@code -Ptest2}, and so on.</li>
+ *       {@code -Puat}, {@code -Pstage}, or {@code -Pprod}.</li>
  *   <li>Direct IntelliJ TestNG run: add {@code -Dapp.env=dev} to the Run
  *       Configuration's VM options.</li>
  *   <li>If nothing is supplied, the environment defaults to {@code test}.</li>
@@ -560,17 +560,13 @@ public final class FrameworkConfig {
     /**
      * Loads one environment profile file using UTF-8.
      *
-     * @param environment validated environment folder name
      * @return loaded properties
-     * @throws IllegalArgumentException if the environment name is unsafe
      * @throws IllegalStateException if the file is missing or cannot be read
      */
-    private static Properties loadProfileProperties(String environment) {
-        String validatedEnvironment = normalizeEnvironment(environment);
-
+    private static Properties loadProfileProperties() {
         Path file = projectPath(
                 "Environment",
-                validatedEnvironment,
+                SELECTED_ENVIRONMENT,
                 "configuration.properties"
         );
 
@@ -748,6 +744,6 @@ public final class FrameworkConfig {
      */
     private static final class ProfilePropertiesHolder {
         private static final Properties INSTANCE =
-                loadProfileProperties(SELECTED_ENVIRONMENT);
+                loadProfileProperties();
     }
 }

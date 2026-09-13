@@ -238,7 +238,7 @@
           mvn -Ptest clean test -Dplaywright.debug=all
 
       IMPORTANT:
-      Use -Pdev, -Ptest2, and so on to select a Maven environment. Do not use
+      Use -Pdev, -Puat, -Pstage, or -Pprod to select a Maven environment. Do not use
       -Dapp.env=dev for a Maven run because systemPropertiesFile is selected by
       build.profile.id. The -Dapp.env option is intended for a direct IntelliJ
       TestNG run where Maven/Surefire is not executing.
