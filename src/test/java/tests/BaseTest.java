@@ -156,7 +156,17 @@ import org.testng.annotations.BeforeMethod;
  * </ul>
  */
 public abstract class BaseTest {
-    private ServiceUrls serviceUrls;
+
+    /*
+     * Loaded only once for the current test JVM.
+     *
+     * This is safe for parallel testing because:
+     * 1. ServiceUrls is immutable.
+     * 2. The Maven environment does not change while the JVM is running.
+     * 3. Tests only read these values.
+     */
+    private static final ServiceUrls SERVICE_URLS =
+            ServiceUrls.load();
 
     /**
      * Creates fresh Playwright resources before every TestNG test method.
@@ -174,11 +184,8 @@ public abstract class BaseTest {
     @BeforeMethod(alwaysRun = true)
     public final void setUpPlaywright() {
         PlaywrightFactory.start();
-        serviceUrls = ServiceUrls.load();
     }
-    protected ServiceUrls urls() {
-        return serviceUrls;
-    }
+
     /**
      * Closes all Playwright resources after every TestNG test method.
      *
@@ -209,6 +216,16 @@ public abstract class BaseTest {
 
             throw cleanupFailure;
         }
+    }
+
+
+    /**
+     * Returns the URLs for the selected environment.
+     *
+     * @return immutable service URLs; never {@code null}
+     */
+    protected final ServiceUrls urls() {
+        return SERVICE_URLS;
     }
 
     /**
