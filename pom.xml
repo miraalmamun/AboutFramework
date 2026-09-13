@@ -262,23 +262,23 @@
         </profile>
 
         <profile>
-            <id>test2</id>
+            <id>uat</id>
             <properties>
-                <build.profile.id>test2</build.profile.id>
+                <build.profile.id>uat</build.profile.id>
             </properties>
         </profile>
 
         <profile>
-            <id>test3</id>
+            <id>prod</id>
             <properties>
-                <build.profile.id>test3</build.profile.id>
+                <build.profile.id>prod</build.profile.id>
             </properties>
         </profile>
 
         <profile>
-            <id>test4</id>
+            <id>stage</id>
             <properties>
-                <build.profile.id>test4</build.profile.id>
+                <build.profile.id>stage</build.profile.id>
             </properties>
         </profile>
     </profiles>

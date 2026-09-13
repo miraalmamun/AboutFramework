@@ -4,11 +4,13 @@ import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
+import config.FrameworkConfig;
 import config.ServiceUrls;
 import factory.PlaywrightFactory;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeSuite;
 
 /**
  * Connects the TestNG per-method lifecycle to {@link PlaywrightFactory}.
@@ -167,6 +169,66 @@ public abstract class BaseTest {
      */
     private static final ServiceUrls SERVICE_URLS =
             ServiceUrls.load();
+
+
+    /**
+     * Displays the environment selected for the current TestNG test-suite run.
+     *
+     * <p>This method executes once before TestNG starts running the suite's test
+     * classes and test methods. It reads the selected environment from
+     * {@link FrameworkConfig#environment()} and prints it clearly in the console.
+     * This helps testers confirm that the tests are running against the expected
+     * environment, such as {@code dev}, {@code test}, {@code uat}, or
+     * {@code staging}.</p>
+     *
+     * <p>The environment may be selected through a Maven profile:</p>
+     *
+     * <pre>{@code
+     * mvn -Ptest test
+     * mvn -Pdev test
+     * mvn -Puat test
+     * }</pre>
+     *
+     * <p>Example console output:</p>
+     *
+     * <pre>{@code
+     * ========================================
+     *  Test environment: test
+     * ========================================
+     * }</pre>
+     *
+     * <p>{@code @BeforeSuite} is used because the environment needs to be
+     * displayed only once for the complete TestNG suite, rather than before every
+     * test class or test method.</p>
+     *
+     * <p>{@code alwaysRun = true} asks TestNG to execute this configuration method
+     * even when test groups, dependencies, failures, or filtering rules are
+     * involved.</p>
+     *
+     * <p>The method is {@code final} so a child test class cannot override it and
+     * accidentally remove or change this framework-level suite behavior.</p>
+     *
+     * <p>This method only displays the selected environment. It does not create a
+     * browser, start Playwright, change configuration values, or switch the
+     * environment.</p>
+     *
+     * @throws IllegalArgumentException if the configured environment name is
+     *                                  invalid
+     * @throws IllegalStateException if the selected environment configuration
+     *                               cannot be loaded
+     *
+     * @see FrameworkConfig#environment()
+     * @see org.testng.annotations.BeforeSuite
+     */
+    @BeforeSuite(alwaysRun = true)
+    public final void displayEnvironment() {
+        System.out.printf(
+                "%n========================================%n" +
+                        " Test environment: %s%n" +
+                        "========================================%n%n",
+                FrameworkConfig.environment()
+        );
+    }
 
     /**
      * Creates fresh Playwright resources before every TestNG test method.
